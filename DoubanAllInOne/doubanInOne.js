@@ -164,9 +164,10 @@ async function getBookInfo(url){
     let text = $("#info")?.textContent.replace("\n","");
     let transAuthor = text.match(/(?<=译者:\s*)\S+\s?\S+/g)?text.match(/(?<=译者:\s*)\S+\s?\S+/g)[0].trim():"";
     let originalName = text.match(/(?<=原作名:\s*)[\S ]+/g)?(text.match(/(?<=原作名:\s*)[\S ]+/g)[0].trim()):"";
+    let originalNameWithQuote = null;
     if(originalName){let originalNameWithQuote = "\""+originalName+"\"";}
-    else{originalNameWithQuote = null;}//如果没有原作名,则originalNameWithQuote为空而非"" 方便matedata信息跳过显示
     let pages = text.match(/(?<=页数:\s*)[\S ]+/g)?text.match(/(?<=页数:\s*)[\S ]+/g)[0].trim():"";
+    if(!pages){pages = '10';}
     let publisher = text.match(/(?<=出版社:\s*)\S+\s?\S+/g)?text.match(/(?<=出版社:\s*)\S+\s?\S+/g)[0].trim():"";
     let publishDate = text.match(/(?<=出版年:\s*)[\S ]+/g)?text.match(/(?<=出版年:\s*)[\S ]+/g)[0].trim():"";
 
@@ -206,21 +207,21 @@ async function getBookInfo(url){
     catalog = $(`#dir_${doubanID}_full`)?.innerText?.replace(/^\s+|· *|\(收起\)$/gm,"");
 
     //原文摘录
-    let quote1 = "";
-    let quote2 = "";
+    let quote1 = " ";
+    let quote2 = " ";
     let quoteList = $2("figure");
     let sourceList = $2("figcaption");
     if(quoteList.length!=0){
-        quote1 = quoteList[0]?.childNodes[0].textContent.replace(/\(/g,"").trim()+"\n"+sourceList[0].textContent.replace(/\s/g,"");
-        quote2 = quoteList[1]?.childNodes[0].textContent.replace(/\(/g,"").trim()+"\n"+sourceList[1].textContent.replace(/\s/g,"");
+        if(quote1!=" ")quote1 = quoteList[0]?.childNodes[0].textContent.replace(/\(/g,"").trim()+"\n"+sourceList[0].textContent.replace(/\s/g,"");
+        if(quote2!=" "){quote2 = quoteList[1]?.childNodes[0].textContent.replace(/\(/g,"").trim()+"\n"+sourceList[1].textContent.replace(/\s/g,"");}
     }
 
     //豆瓣常用标签，记得之前这一块儿网页元素里是有的，后来找不到了，但是尝试性源代码全文搜索的时候 在Script标签里找到了，但是感觉随时会改。
     var temp = $2("script");
     let tags = temp[temp.length-3].textContent.match(/(?<=:)[\u4e00-\u9fa5·]+/g);
-    if(tags==null){tags= [];} //如果tags为空,则初始化tags为空数组
+    if(tags==null){tags= [];}
     tags.push("book");
-
+   
     //相关书籍，仿佛这个信息也没啥用，但是能加就加了
     let relatedBooks = [];
     temp = $2("div#db-rec-section div dl dd");
@@ -256,7 +257,7 @@ async function getBookInfo(url){
     // 如果为空的话，quickadd会出现提示框让自己填，太麻烦了，所以先填一个默认空值
     for(var i in bookInfo){
         if(bookInfo[i]==""||bookInfo[i]==null){
-            bookInfo[i]="Null";//使用Null填充,后续在matedata插件中可以跳过显示
+            bookInfo[i]= "Null";
         }
     }
 
